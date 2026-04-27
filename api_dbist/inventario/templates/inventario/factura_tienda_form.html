@@ -1,0 +1,175 @@
+{% extends 'inventario/base.html' %}
+{% block title %}Nueva Venta{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0">{{ titulo }}</h2>
+  <a href="{{ back_url }}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Volver
+  </a>
+</div>
+
+<form method="post" id="venta-form">
+  {% csrf_token %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-cart4 me-2"></i>Productos</span>
+          <button type="button" class="btn btn-sm btn-light" id="add-line-btn">
+            <i class="bi bi-plus-lg"></i> Agregar
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0" id="lineas-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 230px;">Producto</th>
+                  <th style="width: 120px;">Stock</th>
+                  <th style="width: 120px;">Cantidad</th>
+                  <th style="width: 170px;">Valor Unitario</th>
+                  <th style="width: 150px;">Subtotal</th>
+                  <th style="width: 80px;"></th>
+                </tr>
+              </thead>
+              <tbody id="lineas-body">
+                <tr class="linea-item">
+                  <td>
+                    <select class="form-select producto-select" name="producto_id[]" required>
+                      <option value="">Selecciona...</option>
+                      {% for s in stocks %}
+                        <option value="{{ s.producto_id }}" data-stock="{{ s.cantidad_stock }}">
+                          {{ s.producto.codigo_produ }} - {{ s.producto.nombre }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td><span class="badge bg-secondary stock-badge">0</span></td>
+                  <td><input type="number" class="form-control cantidad-input" name="cantidad[]" min="1" value="1" required></td>
+                  <td><input type="number" class="form-control valor-input" name="valor_unitario[]" min="0.01" step="0.01" value="1.00" required></td>
+                  <td><span class="fw-semibold subtotal-linea">$1.00</span></td>
+                  <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-line-btn">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-primary text-white">Cliente</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <select name="usuario_id" class="form-select" required>
+              <option value="">Selecciona cliente...</option>
+              {% for u in usuarios %}
+                <option value="{{ u.id }}" {% if form_data.usuario_id == u.id|stringformat:"s" %}selected{% endif %}>
+                  {{ u.nombre_propietario }} {{ u.apellido_propietario }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Fecha</label>
+            <input type="date" name="fecha" class="form-control" value="{{ form_data.fecha|default:hoy }}" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">Resumen</div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Items:</span>
+            <strong id="items-count">1</strong>
+          </div>
+          <div class="d-flex justify-content-between fs-5">
+            <span>Total:</span>
+            <strong class="text-success" id="total-general">$1.00</strong>
+          </div>
+          <hr>
+          <button type="submit" class="btn btn-success w-100">
+            <i class="bi bi-check2-circle me-1"></i> Confirmar Venta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  const lineasBody = document.getElementById('lineas-body');
+  const addBtn = document.getElementById('add-line-btn');
+
+  function money(n) {
+    return `$${Number(n).toFixed(2)}`;
+  }
+
+  function updateLine(row) {
+    const select = row.querySelector('.producto-select');
+    const stockBadge = row.querySelector('.stock-badge');
+    const cantidadInput = row.querySelector('.cantidad-input');
+    const cantidad = Number(cantidadInput.value || 0);
+    const valor = Number(row.querySelector('.valor-input').value || 0);
+    const stock = Number(select.options[select.selectedIndex]?.dataset?.stock || 0);
+
+    stockBadge.textContent = stock;
+    row.querySelector('.subtotal-linea').textContent = money(cantidad * valor);
+
+    if (stock > 0 && cantidad > stock) {
+      cantidadInput.classList.add('is-invalid');
+    } else {
+      cantidadInput.classList.remove('is-invalid');
+    }
+  }
+
+  function updateTotals() {
+    const rows = [...document.querySelectorAll('.linea-item')];
+    let total = 0;
+    rows.forEach((row) => {
+      const cantidad = Number(row.querySelector('.cantidad-input').value || 0);
+      const valor = Number(row.querySelector('.valor-input').value || 0);
+      total += cantidad * valor;
+      updateLine(row);
+    });
+    document.getElementById('items-count').textContent = rows.length;
+    document.getElementById('total-general').textContent = money(total);
+  }
+
+  function bindRow(row) {
+    row.querySelector('.producto-select').addEventListener('change', updateTotals);
+    row.querySelector('.cantidad-input').addEventListener('input', updateTotals);
+    row.querySelector('.valor-input').addEventListener('input', updateTotals);
+    row.querySelector('.remove-line-btn').addEventListener('click', () => {
+      if (document.querySelectorAll('.linea-item').length > 1) {
+        row.remove();
+        updateTotals();
+      }
+    });
+  }
+
+  addBtn.addEventListener('click', () => {
+    const first = document.querySelector('.linea-item');
+    const clone = first.cloneNode(true);
+    clone.querySelector('.producto-select').value = '';
+    clone.querySelector('.cantidad-input').value = '1';
+    clone.querySelector('.valor-input').value = '1.00';
+    clone.querySelector('.stock-badge').textContent = '0';
+    clone.querySelector('.subtotal-linea').textContent = '$1.00';
+    lineasBody.appendChild(clone);
+    bindRow(clone);
+    updateTotals();
+  });
+
+  document.querySelectorAll('.linea-item').forEach(bindRow);
+  updateTotals();
+</script>
+{% endblock %}

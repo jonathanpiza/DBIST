@@ -1,0 +1,97 @@
+{% extends 'inventario/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="fw-bold">Dashboard</h2>
+  <p class="text-muted">Resumen del sistema de inventario.</p>
+</div>
+
+<div class="row g-4 mb-5">
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'categorias' %}" class="text-decoration-none">
+      <div class="card shadow-sm h-100 border-start border-4 border-primary">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="fs-2 text-primary"><i class="bi bi-tags-fill"></i></div>
+          <div>
+            <div class="fs-4 fw-bold">{{ total_categorias }}</div>
+            <div class="text-muted small">Categorías</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'proveedores' %}" class="text-decoration-none">
+      <div class="card shadow-sm h-100 border-start border-4 border-success">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="fs-2 text-success"><i class="bi bi-truck-front-fill"></i></div>
+          <div>
+            <div class="fs-4 fw-bold">{{ total_proveedores }}</div>
+            <div class="text-muted small">Proveedores</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'productos' %}" class="text-decoration-none">
+      <div class="card shadow-sm h-100 border-start border-4 border-warning">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="fs-2 text-warning"><i class="bi bi-box-fill"></i></div>
+          <div>
+            <div class="fs-4 fw-bold">{{ total_productos }}</div>
+            <div class="text-muted small">Productos</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'inventarios' %}" class="text-decoration-none">
+      <div class="card shadow-sm h-100 border-start border-4 border-info">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="fs-2 text-info"><i class="bi bi-clipboard2-data-fill"></i></div>
+          <div>
+            <div class="fs-4 fw-bold">{{ total_inventario }}</div>
+            <div class="text-muted small">Registros en Inventario</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'facturas' %}" class="text-decoration-none">
+      <div class="card shadow-sm h-100 border-start border-4 border-danger">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="fs-2 text-danger"><i class="bi bi-receipt-cutoff"></i></div>
+          <div>
+            <div class="fs-4 fw-bold">{{ total_facturas }}</div>
+            <div class="text-muted small">Facturas</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'usuarios' %}" class="text-decoration-none">
+      <div class="card shadow-sm h-100 border-start border-4 border-secondary">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="fs-2 text-secondary"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <div class="fs-4 fw-bold">{{ total_usuarios }}</div>
+            <div class="text-muted small">Usuarios</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-auto"><a href="{% url 'categoria_crear' %}" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Nueva Categoría</a></div>
+  <div class="col-auto"><a href="{% url 'proveedor_crear' %}" class="btn btn-outline-success"><i class="bi bi-plus-lg"></i> Nuevo Proveedor</a></div>
+  <div class="col-auto"><a href="{% url 'producto_crear' %}" class="btn btn-outline-warning"><i class="bi bi-plus-lg"></i> Nuevo Producto</a></div>
+  <div class="col-auto"><a href="{% url 'factura_crear' %}" class="btn btn-outline-danger"><i class="bi bi-plus-lg"></i> Nueva Factura</a></div>
+</div>
+{% endblock %}
